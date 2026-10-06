@@ -5,8 +5,7 @@
 **💊 Recordatorio de medicación**: la app permite cargar medicamentos con su dosis y hora de toma, y avisa con una notificación local.
 
 ## Video demo
-
-▶️ [Ver demo en YouTube]((https://youtube.com/shorts/Uozc7lTIdHM?si=fzGGHvS70_0Edoih))
+▶️ [Ver demo en YouTube](https://youtube.com/shorts/Uozc7lTIdHM?si=fzGGHvS70_0Edoih)
 
 ## Cómo ejecutar la app
 
