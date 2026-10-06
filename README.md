@@ -30,6 +30,10 @@ Para correr los tests:
 ```bash
 npm test
 ```
+### Captura TEST
+
+<img width="1362" height="717" alt="image" src="https://github.com/user-attachments/assets/4c38b803-e060-45d7-ad54-2d03ef0eccd3" />
+
 
 ## Funcionalidades implementadas
 
