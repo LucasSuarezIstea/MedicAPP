@@ -44,7 +44,7 @@ npm test
 - **Notificaciones locales** (expo-notifications): un recordatorio diario a la hora elegida y un aviso de prueba 10 segundos después de guardar. Al eliminar un medicamento se cancela su recordatorio.
 - **Navegación** con React Navigation (Stack): Login, Registro, Home y Nuevo medicamento.
 - **Componentes reutilizables**: `BotonPersonalizado` y `MedicamentoItem`, con estilos en `StyleSheet`.
-- **Tests con Jest + React Native Testing Library** (16 tests): componentes reutilizables, validaciones y formateo de hora, y almacenamiento.
+- **Tests con Jest + React Native Testing Library**: componentes reutilizables, validaciones y formateo de hora, y almacenamiento.
 
 ## Estructura
 
