@@ -6,7 +6,7 @@
 
 ## Video demo
 
-▶️ [Ver demo en YouTube](PEGAR_ACA_EL_LINK_DEL_VIDEO)
+▶️ [Ver demo en YouTube]((https://youtube.com/shorts/Uozc7lTIdHM?si=fzGGHvS70_0Edoih))
 
 ## Cómo ejecutar la app
 
