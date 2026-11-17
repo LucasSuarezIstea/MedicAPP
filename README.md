@@ -118,8 +118,7 @@ __tests__/                  Tests con Jest
 ## Punto extra: IA aplicada al desarrollo
 
 **Herramienta usada:** Claude (asistente de IA de Anthropic) para generar y refactorizar código.
-
-**Ejemplo de prompt:** se le pasó a la IA el enunciado del parcial (PDF) junto con el link al repositorio, como contexto, y se le pidió implementar los requisitos sobre el código existente:
+Utilizada para Arreglar Problema de notificaciones y contactos
 
 > Contexto: app de recordatorio de medicación en React Native + Expo (repo adjunto), con login, AsyncStorage y notificaciones.
 > Tarea: agregar foto (cámara/galería), ubicación de la farmacia, contacto (médico/familiar) y evento de calendario a cada medicamento, migrar el estado a Zustand y sumar tests con Jest.
