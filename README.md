@@ -8,7 +8,7 @@ En el **Parcial 2** se sumó: foto del medicamento, ubicación de la farmacia, c
 
 ## Video demo
 
-- ▶️ **Parcial 2:** [Ver demo en YouTube](PEGAR_ACA_EL_LINK_DEL_VIDEO_NUEVO)
+- ▶️ **Parcial 2:** [Ver demo en YouTube](https://youtube.com/shorts/ghPrZyj5OSc?feature=share)
 - Parcial 1: [Ver demo en YouTube](https://youtube.com/shorts/Uozc7lTIdHM?si=fzGGHvS70_0Edoih)
 
 ## Cómo ejecutar la app
