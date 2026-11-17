@@ -126,8 +126,6 @@ Utilizada para Arreglar Problema de notificaciones y contactos
 
 **Lo que funcionó para mejores resultados:** dar el código real como contexto (no solo la consigna), pedir que siga el estilo existente y fijar las restricciones de antemano.
 
-**Comparación código generado vs. final:** la IA generó la estructura (stores, helpers de recursos, pantallas y tests). Sobre eso se revisó y ajustó: textos de la interfaz, el comportamiento de cada permiso probado en el celular, y se corrieron los tests. El código final mantiene la separación propuesta: lógica pura en `utils/` y `permisos/`, acceso al dispositivo en `recursos/`, estado en `store/`.
-
 ## Autor
 
 Lucas Suarez — Tecnicatura Superior en Desarrollo de Software, Istea.
