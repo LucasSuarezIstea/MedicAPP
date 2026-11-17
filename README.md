@@ -52,6 +52,8 @@ Los tests usan **Jest** (preset `jest-expo`) y **React Native Testing Library**.
 ### Captura TEST
 
 <img width="1362" height="717" alt="image" src="https://github.com/user-attachments/assets/4c38b803-e060-45d7-ad54-2d03ef0eccd3" />
+<img width="1090" height="578" alt="image" src="https://github.com/user-attachments/assets/8bd15fc6-f00f-4a86-9ff2-b7ae35fec458" />
+
 
 
 ## Funcionalidades nuevas (Parcial 2)
