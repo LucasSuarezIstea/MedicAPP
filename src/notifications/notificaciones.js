@@ -22,6 +22,10 @@ import { AndroidImportance } from 'expo-notifications/build/NotificationChannelM
 
 const CANAL = 'medicamentos';
 
+// Si no se puede crear el canal propio (pasa en algunas versiones de Expo Go),
+// las notificaciones usan el canal por defecto de Android.
+let canalDisponible = false;
+
 // Cómo se muestra una notificación si llega con la app abierta.
 setNotificationHandler({
   handleNotification: async () => ({
@@ -34,11 +38,17 @@ setNotificationHandler({
 
 /** Pide permiso para notificar y crea el canal en Android. Devuelve true si hay permiso. */
 export async function pedirPermisos() {
-  if (Platform.OS === 'android') {
-    await setNotificationChannelAsync(CANAL, {
-      name: 'Recordatorios de medicación',
-      importance: AndroidImportance.HIGH,
-    });
+  if (Platform.OS === 'android' && !canalDisponible) {
+    try {
+      await setNotificationChannelAsync(CANAL, {
+        name: 'Recordatorios de medicación',
+        description: 'Avisos para tomar los medicamentos',
+        importance: AndroidImportance.HIGH,
+      });
+      canalDisponible = true;
+    } catch (e) {
+      console.warn('No se pudo crear el canal de notificaciones, se usa el de por defecto:', e);
+    }
   }
 
   const { status } = await getPermissionsAsync();
@@ -63,7 +73,7 @@ export async function programarRecordatorioDiario(medicamento) {
       type: SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
-      channelId: CANAL,
+      ...(canalDisponible ? { channelId: CANAL } : {}),
     },
   });
 }
@@ -81,7 +91,7 @@ export async function programarRecordatorioEnSegundos(medicamento, segundos = 10
     trigger: {
       type: SchedulableTriggerInputTypes.TIME_INTERVAL,
       seconds: segundos,
-      channelId: CANAL,
+      ...(canalDisponible ? { channelId: CANAL } : {}),
     },
   });
 }

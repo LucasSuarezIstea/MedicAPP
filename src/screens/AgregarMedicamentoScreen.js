@@ -1,25 +1,29 @@
 import { useState } from 'react';
-import { Text, TextInput, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, Switch, StyleSheet, ScrollView, Alert } from 'react-native';
 import BotonPersonalizado from '../components/BotonPersonalizado';
+import SeccionRecursos from '../components/SeccionRecursos';
 import { validarMedicamento, formatearHora } from '../utils/validaciones';
-import { obtenerMedicamentos, guardarMedicamentos } from '../storage/storage';
 import {
   pedirPermisos,
   programarRecordatorioDiario,
   programarRecordatorioEnSegundos,
 } from '../notifications/notificaciones';
-import { useAuth } from '../context/AuthContext';
+import { crearEventoToma } from '../recursos/calendario';
+import { useMedicamentosStore } from '../store/useMedicamentosStore';
 import { colores, espacio } from '../theme';
 
 const SEGUNDOS_DEMO = 10;
 
 export default function AgregarMedicamentoScreen({ navigation }) {
-  const { usuario } = useAuth();
+  const agregar = useMedicamentosStore((s) => s.agregar);
   const [nombre, setNombre] = useState('');
   const [dosis, setDosis] = useState('');
   const [hora, setHora] = useState('');
   const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
+  // Recursos del dispositivo asociados al medicamento
+  const [recursos, setRecursos] = useState({ foto: null, ubicacion: null, contacto: null });
+  const [agregarAlCalendario, setAgregarAlCalendario] = useState(true);
 
   const guardar = async () => {
     const errorValidacion = validarMedicamento(nombre, hora);
@@ -36,30 +40,50 @@ export default function AgregarMedicamentoScreen({ navigation }) {
       dosis: dosis.trim(),
       hora: formatearHora(hora),
       notificacionId: null,
+      foto: recursos.foto,
+      ubicacion: recursos.ubicacion,
+      contacto: recursos.contacto,
+      eventoCalendarioId: null,
     };
 
+    // 1) Notificaciones: si fallan, el medicamento se guarda igual
+    let permiso = false;
     try {
-      const permiso = await pedirPermisos();
+      permiso = await pedirPermisos();
       if (permiso) {
-        // Recordatorio real: todos los días a la hora elegida
         medicamento.notificacionId = await programarRecordatorioDiario(medicamento);
-        // Recordatorio de prueba a los pocos segundos (para la demo)
         await programarRecordatorioEnSegundos(medicamento, SEGUNDOS_DEMO);
       }
+    } catch (e) {
+      console.warn('Error en notificaciones:', e);
+      permiso = false;
+    }
 
-      const lista = await obtenerMedicamentos(usuario);
-      await guardarMedicamentos(usuario, [...lista, medicamento]);
+    // 2) Calendario: si falla, el medicamento se guarda igual
+    if (agregarAlCalendario) {
+      try {
+        medicamento.eventoCalendarioId = await crearEventoToma(medicamento);
+      } catch (e) {
+        console.warn('Error en calendario:', e);
+        medicamento.eventoCalendarioId = null;
+      }
+    }
+
+    // 3) Guardar en el store global (que también lo persiste en AsyncStorage)
+    try {
+      await agregar(medicamento);
 
       Alert.alert(
         'Medicamento guardado',
-        permiso
+        (permiso
           ? `Te vamos a avisar todos los días a las ${medicamento.hora}. ` +
-              `También vas a recibir un aviso de prueba en ${SEGUNDOS_DEMO} segundos.`
-          : 'Se guardó, pero no hay permiso para enviar notificaciones.'
+            `También vas a recibir un aviso de prueba en ${SEGUNDOS_DEMO} segundos.`
+          : 'Se guardó, pero no hay permiso para enviar notificaciones.') +
+          (medicamento.eventoCalendarioId ? ' Además se agregó a tu calendario.' : '')
       );
       navigation.goBack();
     } catch (e) {
-      setError('No se pudo guardar el medicamento');
+      setError(`No se pudo guardar el medicamento: ${e?.message || e}`);
     } finally {
       setGuardando(false);
     }
@@ -93,6 +117,25 @@ export default function AgregarMedicamentoScreen({ navigation }) {
         onChangeText={setHora}
       />
       <Text style={styles.ayuda}>Formato 24 horas. Te va a llegar un aviso todos los días.</Text>
+
+      <SeccionRecursos
+        foto={recursos.foto}
+        ubicacion={recursos.ubicacion}
+        contacto={recursos.contacto}
+        onCambio={(cambios) => setRecursos((prev) => ({ ...prev, ...cambios }))}
+      />
+
+      <View style={styles.calendario}>
+        <View style={styles.calendarioTextos}>
+          <Text style={styles.calendarioTitulo}>📅 Agregar al calendario</Text>
+          <Text style={styles.ayudaCalendario}>Crea un evento diario a la hora de la toma</Text>
+        </View>
+        <Switch
+          value={agregarAlCalendario}
+          onValueChange={setAgregarAlCalendario}
+          trackColor={{ true: colores.primario }}
+        />
+      </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -132,6 +175,28 @@ const styles = StyleSheet.create({
     color: colores.textoSuave,
     marginTop: -8,
     marginBottom: espacio.medio,
+  },
+  calendario: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colores.tarjeta,
+    borderWidth: 1,
+    borderColor: colores.borde,
+    borderRadius: 10,
+    padding: 12,
+    marginVertical: espacio.medio,
+  },
+  calendarioTextos: {
+    flex: 1,
+  },
+  calendarioTitulo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colores.texto,
+  },
+  ayudaCalendario: {
+    fontSize: 13,
+    color: colores.textoSuave,
   },
   error: {
     color: colores.peligro,

@@ -63,3 +63,32 @@ export function validarMedicamento(nombre, hora) {
 export function ordenarPorHora(medicamentos) {
   return [...medicamentos].sort((a, b) => a.hora.localeCompare(b.hora));
 }
+
+/**
+ * Próxima fecha en la que toca la hora "HH:MM":
+ * hoy si todavía no pasó, mañana si ya pasó.
+ */
+export function proximaFecha(hora, ahora = new Date()) {
+  const [h, m] = hora.split(':').map(Number);
+  const fecha = new Date(ahora);
+  fecha.setHours(h, m, 0, 0);
+  if (fecha <= ahora) fecha.setDate(fecha.getDate() + 1);
+  return fecha;
+}
+
+/** Arma una dirección legible a partir del resultado de reverseGeocodeAsync. */
+export function formatearDireccion(lugar) {
+  if (!lugar) return '';
+  const calle = [lugar.street, lugar.streetNumber].filter(Boolean).join(' ');
+  return [calle || lugar.name, lugar.city || lugar.subregion, lugar.region]
+    .filter(Boolean)
+    .filter((parte, i, partes) => partes.indexOf(parte) === i)
+    .join(', ');
+}
+
+/** Texto corto para mostrar una ubicación (dirección o, si no hay, coordenadas). */
+export function textoUbicacion(ubicacion) {
+  if (!ubicacion) return '';
+  if (ubicacion.direccion) return ubicacion.direccion;
+  return `${ubicacion.latitud.toFixed(5)}, ${ubicacion.longitud.toFixed(5)}`;
+}

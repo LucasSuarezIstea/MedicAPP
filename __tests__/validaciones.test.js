@@ -5,6 +5,9 @@ import {
   formatearHora,
   validarMedicamento,
   ordenarPorHora,
+  proximaFecha,
+  formatearDireccion,
+  textoUbicacion,
 } from '../src/utils/validaciones';
 
 describe('validarRegistro', () => {
@@ -69,5 +72,41 @@ describe('ordenarPorHora', () => {
     ];
     expect(ordenarPorHora(lista).map((m) => m.id)).toEqual(['2', '3', '1']);
     expect(lista[0].id).toBe('1');
+  });
+});
+
+describe('recursos del dispositivo (lógica pura)', () => {
+  test('proximaFecha devuelve hoy si la hora no pasó y mañana si ya pasó', () => {
+    const ahora = new Date(2026, 10, 17, 10, 0); // 17/11/2026 10:00
+
+    const hoy = proximaFecha('20:30', ahora);
+    expect(hoy.getDate()).toBe(17);
+    expect(hoy.getHours()).toBe(20);
+    expect(hoy.getMinutes()).toBe(30);
+
+    const manana = proximaFecha('08:00', ahora);
+    expect(manana.getDate()).toBe(18);
+    expect(manana.getHours()).toBe(8);
+  });
+
+  test('formatearDireccion arma un texto legible sin repetir partes', () => {
+    expect(
+      formatearDireccion({
+        street: 'Av. Corrientes',
+        streetNumber: '1234',
+        city: 'Buenos Aires',
+        region: 'Buenos Aires',
+      })
+    ).toBe('Av. Corrientes 1234, Buenos Aires');
+    expect(formatearDireccion(null)).toBe('');
+  });
+
+  test('textoUbicacion usa la dirección o, si no hay, las coordenadas', () => {
+    expect(textoUbicacion({ latitud: -34.6, longitud: -58.4, direccion: 'Farmacia Centro' })).toBe(
+      'Farmacia Centro'
+    );
+    expect(textoUbicacion({ latitud: -34.603722, longitud: -58.381592, direccion: '' })).toBe(
+      '-34.60372, -58.38159'
+    );
   });
 });

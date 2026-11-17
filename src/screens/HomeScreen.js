@@ -1,17 +1,21 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Alert } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useEffect, useLayoutEffect } from 'react';
+import { View, Text, FlatList, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import MedicamentoItem from '../components/MedicamentoItem';
 import BotonPersonalizado from '../components/BotonPersonalizado';
-import { obtenerMedicamentos, guardarMedicamentos } from '../storage/storage';
 import { cancelarNotificacion } from '../notifications/notificaciones';
-import { ordenarPorHora } from '../utils/validaciones';
-import { useAuth } from '../context/AuthContext';
+import { eliminarEventoToma } from '../recursos/calendario';
+import { useAuthStore } from '../store/useAuthStore';
+import { useMedicamentosStore } from '../store/useMedicamentosStore';
 import { colores, espacio } from '../theme';
 
 export default function HomeScreen({ navigation }) {
-  const { usuario, salir } = useAuth();
-  const [medicamentos, setMedicamentos] = useState([]);
+  // Todo el estado sale de los stores globales (Zustand)
+  const usuario = useAuthStore((s) => s.usuario);
+  const salir = useAuthStore((s) => s.salir);
+  const medicamentos = useMedicamentosStore((s) => s.medicamentos);
+  const cargando = useMedicamentosStore((s) => s.cargando);
+  const cargar = useMedicamentosStore((s) => s.cargar);
+  const eliminarDelStore = useMedicamentosStore((s) => s.eliminar);
 
   // Botón "Salir" en la barra superior
   useLayoutEffect(() => {
@@ -20,12 +24,10 @@ export default function HomeScreen({ navigation }) {
     });
   }, [navigation, salir]);
 
-  // Recarga la lista cada vez que la pantalla vuelve a estar visible
-  useFocusEffect(
-    useCallback(() => {
-      obtenerMedicamentos(usuario).then((lista) => setMedicamentos(ordenarPorHora(lista)));
-    }, [usuario])
-  );
+  // Carga los medicamentos del usuario una vez; después el store se mantiene actualizado solo
+  useEffect(() => {
+    cargar(usuario);
+  }, [usuario, cargar]);
 
   const eliminar = (id) => {
     const med = medicamentos.find((m) => m.id === id);
@@ -36,9 +38,8 @@ export default function HomeScreen({ navigation }) {
         style: 'destructive',
         onPress: async () => {
           await cancelarNotificacion(med?.notificacionId);
-          const nueva = medicamentos.filter((m) => m.id !== id);
-          setMedicamentos(nueva);
-          await guardarMedicamentos(usuario, nueva);
+          await eliminarEventoToma(med?.eventoCalendarioId);
+          await eliminarDelStore(id);
         },
       },
     ]);
@@ -53,17 +54,27 @@ export default function HomeScreen({ navigation }) {
           : `Tenés ${medicamentos.length} medicamento${medicamentos.length > 1 ? 's' : ''} con recordatorio`}
       </Text>
 
-      <FlatList
-        data={medicamentos}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MedicamentoItem medicamento={item} onEliminar={eliminar} />}
-        contentContainerStyle={medicamentos.length === 0 && styles.listaVacia}
-        ListEmptyComponent={
-          <Text style={styles.vacio}>
-            Tocá "Agregar medicamento" para crear tu primer recordatorio.
-          </Text>
-        }
-      />
+      {cargando ? (
+        <ActivityIndicator size="large" color={colores.primario} style={styles.listaVacia} />
+      ) : (
+        <FlatList
+          data={medicamentos}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <MedicamentoItem
+              medicamento={item}
+              onEliminar={eliminar}
+              onPress={() => navigation.navigate('Detalle', { id: item.id })}
+            />
+          )}
+          contentContainerStyle={medicamentos.length === 0 && styles.listaVacia}
+          ListEmptyComponent={
+            <Text style={styles.vacio}>
+              Tocá "Agregar medicamento" para crear tu primer recordatorio.
+            </Text>
+          }
+        />
+      )}
 
       <BotonPersonalizado
         titulo="+ Agregar medicamento"

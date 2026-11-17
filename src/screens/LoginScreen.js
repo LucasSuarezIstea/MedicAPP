@@ -3,11 +3,11 @@ import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform } fro
 import BotonPersonalizado from '../components/BotonPersonalizado';
 import { validarLogin } from '../utils/validaciones';
 import { validarCredenciales } from '../storage/storage';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/useAuthStore';
 import { colores, espacio } from '../theme';
 
 export default function LoginScreen({ navigation }) {
-  const { iniciarSesion } = useAuth();
+  const iniciarSesion = useAuthStore((s) => s.iniciarSesion);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
